@@ -20,6 +20,13 @@ class MainActivity : AppCompatActivity() {
 
     val myFormatter = DecimalFormat("######.######")
 
+    var history : String = ""
+    var currentResule : String = ""
+
+    var dotControl : Boolean = true
+
+    var buttonEqualControl : Boolean = false
+
 
 
 
@@ -65,14 +72,31 @@ class MainActivity : AppCompatActivity() {
         }
 
         mainBinding.btnAC.setOnClickListener(){
+            onButtonACClicked()
+
 
         }
 
         mainBinding.btnDel.setOnClickListener(){
 
+            number?.let {
+                if (it.length == 1){
+                    onButtonACClicked()
+                }else{
+                   number = it.substring(0,it.length-1)
+                   mainBinding.textViewResult.text = number
+                   dotControl = !number!!.contains(".")
+                }
+            }
+
+
         }
 
         mainBinding.btnDivide.setOnClickListener(){
+            history = mainBinding.textViewHistory.text.toString()
+            currentResule = mainBinding.textViewResult.text.toString()
+            mainBinding.textViewHistory.text = history.plus(currentResule).plus("/")
+
             if (operator){
                 when(status){
 
@@ -86,10 +110,16 @@ class MainActivity : AppCompatActivity() {
             status = "division"
             operator = false
             number = null
+            dotControl = true
+
 
         }
 
         mainBinding.btnMulti.setOnClickListener(){
+            history = mainBinding.textViewHistory.text.toString()
+            currentResule = mainBinding.textViewResult.text.toString()
+            mainBinding.textViewHistory.text = history.plus(currentResule).plus("*")
+
             if (operator){
                 when(status){
 
@@ -103,10 +133,16 @@ class MainActivity : AppCompatActivity() {
             status = "multiplication"
             operator = false
             number = null
+            dotControl = true
+
 
         }
 
         mainBinding.btnPlus.setOnClickListener(){
+            history = mainBinding.textViewHistory.text.toString()
+            currentResule = mainBinding.textViewResult.text.toString()
+            mainBinding.textViewHistory.text = history.plus(currentResule).plus("+")
+
             if (operator){
                 when(status){
 
@@ -120,9 +156,15 @@ class MainActivity : AppCompatActivity() {
             status = "addition"
             operator = false
             number = null
+            dotControl = true
+
 
         }
         mainBinding.btnMinus.setOnClickListener(){
+            history = mainBinding.textViewHistory.text.toString()
+            currentResule = mainBinding.textViewResult.text.toString()
+            mainBinding.textViewHistory.text = history.plus(currentResule).plus("-")
+
             if (operator){
                 when(status){
 
@@ -136,41 +178,107 @@ class MainActivity : AppCompatActivity() {
             status = "subtraction"
             operator = false
             number = null
+            dotControl = true
 
         }
         mainBinding.btnDot.setOnClickListener(){
 
+            if (dotControl) {
+                    number = if (number == null){
+                        "0."
+                    }else if (buttonEqualControl){
+                        if (mainBinding.textViewResult.text.toString().contains("")){
+                            mainBinding.textViewResult.text.toString()
+                        }else{
+                            mainBinding.textViewResult.text.toString().plus( ".")
+                        }
+                    }
+
+                    else{
+                        "$number."
+                    }
+                mainBinding.textViewResult.text = number
+            }
+            dotControl = false
+
+
         }
         mainBinding.btnEqual.setOnClickListener(){
+            history = mainBinding.textViewHistory.text.toString()
+            currentResule = mainBinding.textViewResult.text.toString()
+
+
+            if (operator){
+                when(status){
+
+                    "multiplication" -> multiply()
+                    "division" -> divide()
+                    "subtraction" -> minus()
+                    "addition" -> plus()
+                    else -> firstNumber = mainBinding.textViewResult.text.toString().toDouble()
+
+                }
+                mainBinding.textViewHistory.text = history.plus(currentResule).plus("=").plus(mainBinding.textViewResult.text.toString())
+            }
+             operator = false
+             dotControl = true
+            buttonEqualControl = true
 
         }
 
     }
+    fun onButtonACClicked(){
+        number = null
+        status = null
+        mainBinding.textViewResult.text = "0"
+        mainBinding.textViewHistory.text = ""
+        firstNumber = 0.0
+        lastNumber = 0.0
+        dotControl = true
+        buttonEqualControl = false
+    }
+
+
     fun onNumberClicked(clickedNumber: String){
         if (number == null){
             number = clickedNumber
-        }else{
+        }else if (buttonEqualControl){
+            number = if(dotControl){
+                clickedNumber
+            }else{
+                mainBinding.textViewResult.text.toString().plus(clickedNumber)
+            }
+            firstNumber = number!!.toDouble()
+            lastNumber = 0.0
+            status = null
+            mainBinding.textViewHistory.text = ""
+
+        }
+
+        else{
             number += clickedNumber
         }
         mainBinding.textViewResult.text = number
 
+
         operator = true
+        buttonEqualControl = false
     }
 
     fun plus(){
         lastNumber = mainBinding.textViewResult.text.toString().toDouble()
         firstNumber += lastNumber
-        mainBinding.textViewResult.text = firstNumber.toString()
+        mainBinding.textViewResult.text = myFormatter.format(firstNumber)
     }
     fun minus(){
         lastNumber = mainBinding.textViewResult.text.toString().toDouble()
         firstNumber -= lastNumber
-        mainBinding.textViewResult.text = firstNumber.toString()
+        mainBinding.textViewResult.text = myFormatter.format(firstNumber)
     }
     fun multiply(){
         lastNumber = mainBinding.textViewResult.text.toString().toDouble()
         firstNumber *= lastNumber
-        mainBinding.textViewResult.text = firstNumber.toString()
+        mainBinding.textViewResult.text = myFormatter.format(firstNumber)
     }
     fun divide(){
         lastNumber = mainBinding.textViewResult.text.toString().toDouble()
@@ -178,7 +286,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(applicationContext,"The diviser cannot be ZERO",Toast.LENGTH_LONG).show()
         }else{
              firstNumber /= lastNumber
-             mainBinding.textViewResult.text = firstNumber.toString()
+             mainBinding.textViewResult.text = myFormatter.format(firstNumber)
             }
     }
 }
