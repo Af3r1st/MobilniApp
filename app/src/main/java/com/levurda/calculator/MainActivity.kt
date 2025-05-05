@@ -1,5 +1,6 @@
 package com.levurda.calculator
 
+import android.content.Intent
 import android.icu.text.DecimalFormat
 import android.os.Bundle
 import android.widget.Toast
@@ -223,6 +224,19 @@ class MainActivity : AppCompatActivity() {
              operator = false
              dotControl = true
             buttonEqualControl = true
+
+        }
+        mainBinding.toolbar.setOnMenuItemClickListener{ item ->
+
+            when(item.itemId){
+                R.id.setting_item -> {
+                    val intent = Intent(this@MainActivity,ChangeTheme::class.java)
+                    startActivity(intent)
+                    return@setOnMenuItemClickListener  true
+                }
+
+                else -> return@setOnMenuItemClickListener false
+            }
 
         }
 
